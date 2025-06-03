@@ -75,10 +75,10 @@ Alternatively, these constants may be defined in your `wp-config.php` file.
 **DISABLE_WP_CRON**
 `true` | `false` (default: true)
 
-Does not disable or change WP Scheduling functions but disables the default internal wp-cron process. The internal process may be disabled when triggered by a server based cron event or an external request to `/wp-cron.php?doing_wp_cron` like:
+Does not disable or change WP scheduling functions but disables the default internal wp-cron process. The internal process may be disabled when triggered by a server based cron event or an external request to `/wp-cron.php?doing_wp_cron` like:
  
 - server-based cron  
-    `wget -q -O - https://domain.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1`
+    `wget -q -O - https://domain.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1`  
     `wp cron event run –due-now`
 - [EasyCron](https://www.easycron.com)
 - [UptimeRobot](https://www.uptimerobot.com/)
@@ -94,7 +94,7 @@ Store WP-Cron events in a custom table rather than 'cron' option in the WP optio
 * Caches to a custom table and [WP Object Cache](https://developer.wordpress.org/reference/classes/wp_object_cache/).
 * Removes `cron` from the WP options table and `$alloptions` array.
 * Lessens database reads/writes.
-* Significantly reducing overhead.
+* Significantly reduces overhead.
 
 *This will generate `The cron event list could not be saved` error in `wp-cron.php` when WordPress updates an event. This can be ignored since the event list has been saved to the custom table and cache.*
 
