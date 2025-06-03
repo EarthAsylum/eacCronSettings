@@ -43,20 +43,20 @@
 
     By default, this plugin...
 
-    - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (DISABLE_WP_CRON).
-    - Caches WP-Cron events to a custom table (and wp_object_cache), removing the 'cron' option (WP_CRON_CACHE_EVENTS).
-    - Sets the minimum cron interval to 5 minutes (WP_CRON_MINIMUM_INTERVAL).
-    - Adds a 'Monthly' interval based on the days in the current month (WP_CRON_SCHEDULE_INTERVALS).
-    - Increases Action Scheduler run time limit from 30 to 60 seconds (AS_RUN_TIME_LIMIT)
-    - Changes Action Scheduler clean-up retention period from 1 month to 1 week (AS_CLEANUP_RETENTION_PERIOD).
+    - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
+    - Caches WP-Cron events to a custom table and WP Object Cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
+    - Sets the minimum cron run interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
+    - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
+    - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
+    - Changes Action Scheduler clean-up retention period from 1 month to 1 week (`AS_CLEANUP_RETENTION_PERIOD`).
     - Adds 'failed' actions to Action Scheduler's automatic clean-up.
-    - Changes Action Scheduler clean-up batch size from 20 to 100 (AS_CLEANUP_BATCH_SIZE).
+    - Changes Action Scheduler clean-up batch size from 20 to 100 (`AS_CLEANUP_BATCH_SIZE`).
 
     Optionally...
 
-    - Disable the Action Scheduler queue runner (DISABLE_AS_QUEUE_RUNNER).
-    - Log scheduling errors (WP_CRON_LOG_ERRORS).
-    - Log scheduling events for debugging (WP_CRON_DEBUG).
+    - Disable the Action Scheduler queue runner (`DISABLE_AS_QUEUE_RUNNER`).
+    - Log scheduling errors (`WP_CRON_LOG_ERRORS`).
+    - Log scheduling events for debugging (`WP_CRON_DEBUG`).
  *
  ***** */
 
@@ -137,7 +137,7 @@ define_constants([
 define_constants([
     /*
      * Disable the Action Scheduler queue runner.
-     * Does not disable or change Action Scheduler functions but stops events from running.
+     * Does not disable or change Action Scheduler functions but stops events from running via WP-Cron.
      */
 
     //'DISABLE_AS_QUEUE_RUNNER'         => true,
@@ -183,10 +183,10 @@ define_constants([
  */
 add_action("wpcron_log_error", function($message,$source)
 {
-	if (has_action("eacDoojigger_log_error")) {
-		do_action("eacDoojigger_log_error",$message,$source);
-	}
-	error_log($source.': '.$message);
+    if (has_action("eacDoojigger_log_error")) {
+        do_action("eacDoojigger_log_error",$message,$source);
+    }
+    error_log($source.': '.$message);
 },10,2);
 
 /*
@@ -194,11 +194,11 @@ add_action("wpcron_log_error", function($message,$source)
  */
 add_action("wpcron_log_debug", function($data,$source)
 {
-	if (has_action("eacDoojigger_log_debug")) {
-		do_action("eacDoojigger_log_debug",$data,$source);
-	} else {
-		error_log($source.': '.var_export($data,true));
-	}
+    if (has_action("eacDoojigger_log_debug")) {
+        do_action("eacDoojigger_log_debug",$data,$source);
+    } else {
+        error_log($source.': '.var_export($data,true));
+    }
 },10,2);
 
 
@@ -272,7 +272,7 @@ add_action('action_scheduler_init', function()
     if (defined('AS_CLEANUP_RETENTION_PERIOD') && is_int(AS_CLEANUP_RETENTION_PERIOD))
     {
         add_filter( 'action_scheduler_retention_period', fn() => AS_CLEANUP_RETENTION_PERIOD );
-	    add_filter( 'action_scheduler_default_cleaner_statuses', fn($s) => $s[] = \ActionScheduler_Store::STATUS_FAILED );
+        add_filter( 'action_scheduler_default_cleaner_statuses', fn($s) => $s[] = \ActionScheduler_Store::STATUS_FAILED );
     }
 
     /*
@@ -486,7 +486,7 @@ function create_cache_table()
     if (!$result) {
         do_action('wpcron_log_error',$wpdb->last_error,__FUNCTION__);
     } else if ($cron = get_option('cron')) {
-	    // once we create the cron cache, we can delete the cron option
+        // once we create the cron cache, we can delete the cron option
         _update_option_cron($cron, false, 'cron');
         delete_option('cron');
     }

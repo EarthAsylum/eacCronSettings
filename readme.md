@@ -43,7 +43,7 @@ See: https://actionscheduler.org/
 The default WP-Cron behavior can be disabled and replaced with a more reliable time-based trigger, such as a server
 cron event or third-party cron service, making it more timely and less dependent on web site traffic.
 
-**{eac}CronSettings** and **{eac}CronRouting** are used to provide some controls and efficiencies over WP-Cron and/or Action Scheduler.
+**{eac}CronSettings** and **{eac}CronRouting** are used to provide some controls and efficiencies over WP-Cron and/or Action Scheduler while not necessitating any other code changes in WordPress.
 
 
 #### {eac}CronSettings
@@ -52,7 +52,7 @@ cron event or third-party cron service, making it more timely and less dependent
 By default, this plugin...
 
 - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
-- Caches WP-Cron events to a custom table and wp_object_cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
+- Caches WP-Cron events to a custom table and WP Object Cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
 - Sets the minimum cron run interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
 - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
 - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
@@ -75,10 +75,11 @@ Alternatively, these constants may be defined in your `wp-config.php` file.
 **DISABLE_WP_CRON**
 `true` | `false` (default: true)
 
-The internal wp-cron process may be disabled when triggered by an external request to `/wp-cron.php?doing_wp_cron` like:
+Does not disable or change WP Scheduling functions but disables the default internal wp-cron process. The internal process may be disabled when triggered by a server based cron event or an external request to `/wp-cron.php?doing_wp_cron` like:
  
-- server-based crontab  
+- server-based cron  
     `wget -q -O - https://domain.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1`
+    `wp cron event run –due-now`
 - [EasyCron](https://www.easycron.com)
 - [UptimeRobot](https://www.uptimerobot.com/)
 - [cron-job.org](https://cron-job.org/)
@@ -134,7 +135,7 @@ Logs to the {eac}Doojigger debugging log OR the system error log.
 `true` | `false` (default: undefined)
 
 Disable the Action Scheduler queue runner.  
-Does not disable or change Action Scheduler functions but prevents actions from running. This can (should) be used after routing actions to WP-Cron events with {eac}CronRouting.
+Does not disable or change Action Scheduler functions but prevents actions from running via the queue runner triggered by WP-Cron. Like WP-Cron, Action Scheduler actions may be triggered by an external process (server cron or third-party cron service) using a [WP-CLI command](https://actionscheduler.org/wp-cli/).
 
 **AS_RUN_TIME_LIMIT**
 `int (seconds)` (default: 60)

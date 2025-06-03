@@ -40,12 +40,12 @@
 
     This plugin facilitates...
 
-	- Routing WP-Cron events to Action Scheduler actions.
-	- Routing Action Scheduler actions to WP-Cron events.
+    - Routing WP-Cron events to Action Scheduler actions.
+    - Routing Action Scheduler actions to WP-Cron events.
 
-	Neither option offers a complete solution but most events/actions will end up being rerouted to the desired process.
-	You may need to manually remove events/actions from one process once they have been routed to the other process.
-	Recurring Action Scheduler actions may need to be manually removed in order to force rescheduling to wp-Cron.
+    Neither option offers a complete solution but most events/actions will end up being rerouted to the desired process.
+    You may need to manually remove events/actions from one process once they have been routed to the other process.
+    Recurring Action Scheduler actions may need to be manually removed in order to force rescheduling to wp-Cron.
  *
  ***** */
 
@@ -71,14 +71,14 @@ const AS_CRON_HOOK  = 'action_scheduler_run_queue';
  */
  if (!defined('WP_CRON_REROUTE_EVENTS'))
  {
-	// no routing of events or actions
- 	define('WP_CRON_REROUTE_EVENTS',false);
+    // no routing of events or actions
+    define('WP_CRON_REROUTE_EVENTS',false);
 
-	// wp-cron -> action scheduler
-// 	define('WP_CRON_REROUTE_EVENTS',WP_TO_AS);
+    // wp-cron -> action scheduler
+//  define('WP_CRON_REROUTE_EVENTS',WP_TO_AS);
 
-	// action scheduler -> wp-cron
-// 	define('WP_CRON_REROUTE_EVENTS',AS_TO_WP);
+    // action scheduler -> wp-cron
+//  define('WP_CRON_REROUTE_EVENTS',AS_TO_WP);
  }
 
 
@@ -98,21 +98,21 @@ const AS_CRON_HOOK  = 'action_scheduler_run_queue';
 
 if (defined('WP_CRON_REROUTE_EVENTS') && WP_CRON_REROUTE_EVENTS)
 {
-	/*
-	 * add schedules translated from Action Scheduler intervals when rerouting events
-	 */
-	if ($schedules = get_option('as_wp_cron_schedules'))
-	{
-		add_filter('cron_schedules', function($cron_intervals) use($schedules)
-		{
-			return array_merge($cron_intervals,$schedules);
-		},1000);
-	}
+    /*
+     * add schedules translated from Action Scheduler intervals when rerouting events
+     */
+    if ($schedules = get_option('as_wp_cron_schedules'))
+    {
+        add_filter('cron_schedules', function($cron_intervals) use($schedules)
+        {
+            return array_merge($cron_intervals,$schedules);
+        },1000);
+    }
 
-	/*
-	 * Route WP-Cron to Action Scheduler or Action Scheduler to WP-Cron.
-	 * Events scheduled before WordPress 'init' are not rerouted.
-	 */
+    /*
+     * Route WP-Cron to Action Scheduler or Action Scheduler to WP-Cron.
+     * Events scheduled before WordPress 'init' are not rerouted.
+     */
     add_action('action_scheduler_init', function()
     {
         // Route WP-Cron to Action Scheduler
