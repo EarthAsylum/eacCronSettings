@@ -12,7 +12,7 @@ Last Updated:           02-Jun-2025
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires PHP:           8.1  
-Contributors:           earthasylum@github,kevinburkholder@wordpress  
+Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
 License:				GPLv3 or later  
 License URI:			https://www.gnu.org/licenses/gpl.html  
 GitHub URI:             https://github.com/EarthAsylum/eacCronSettings  
