@@ -19,8 +19,8 @@ GitHub URI:             https://github.com/EarthAsylum/eacCronSettings
 
 </details>
 
-*{eac}CronSettings* - Site wide settings and actions for WP-Cron / Action Scheduler.
-*{eac}CronRouting* - Reroute WP-Cron events to Action Scheduler or Action Scheduler actions to WP-Cron.
+**{eac}CronSettings** - Site wide settings and actions for WP-Cron / Action Scheduler.  
+**{eac}CronRouting** - Reroute WP-Cron events to Action Scheduler or Action Scheduler actions to WP-Cron.
 
 ### Description
 
@@ -40,14 +40,18 @@ queue runner process so is also dependent on web site traffic.
 See: https://actionscheduler.org/
 
 The default WP-Cron behavior can be disabled and replaced with a more reliable time-based trigger, such as a server
-cron event or third-pary cron service, making it more timely and less dependent on web site traffic.
+cron event or third-party cron service, making it more timely and less dependent on web site traffic.
+
+**{eac}CronSettings** and **{eac}CronRouting** are used to provide some controls and efficiencies over WP-Cron and/or Action Scheduler.
+
 
 #### {eac}CronSettings
+- - -
 
 By default, this plugin...
 
 - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
-- Caches WP-Cron events to a custom table (and wp_object_cache), removing the 'cron' option (`WP_CRON_CACHE_EVENTS`).
+- Caches WP-Cron events to a custom table and wp_object_cache, removing the 'cron' option (`WP_CRON_CACHE_EVENTS`).
 - Sets the minimum cron interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
 - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
 - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
@@ -61,7 +65,7 @@ Optionally...
 - Log scheduling errors (`WP_CRON_LOG_ERRORS`).
 - Log scheduling events for debugging (`WP_CRON_DEBUG`).
 
-##### Defined Constants
+#### Defined Constants
 
 The constants used in {eac}CronSettings should be reviewed and changed to suit your requirements. Constants may be set as needed, deleted or 'commented-out' if not needed.
 
@@ -123,7 +127,7 @@ Logs to the {eac}Doojigger debugging log OR the system error log.
 `true` | `false` (default: undefined)
 
 Disable the Action Scheduler queue runner.  
-Does not disable or change Action Scheduler functions but prevents actions from running. This can (should) be used after routing actions to WP-Cron events with `WP_CRON_REROUTE_EVENTS`.
+Does not disable or change Action Scheduler functions but prevents actions from running. This can (should) be used after routing actions to WP-Cron events with {eac}CronRouting.
 
 **AS_RUN_TIME_LIMIT**
 `int (seconds)` (default: 60)
@@ -143,13 +147,14 @@ Set Action Scheduler clean-up batch size.
 Action Scheduler normally purges only 20 records at a time in its clean-up process.
 
 #### {eac}CronRouting
+- - -
 
 This plugin facilitates...
 
 - Routing WP-Cron events to Action Scheduler actions.
 - Routing Action Scheduler actions to WP-Cron events.
 
-##### Defined Constants
+#### Defined Constants
 
 The `WP_CRON_REROUTE_EVENTS` constant used in {eac}CronRouting should be reviewed and changed to suit your requirements. 
 

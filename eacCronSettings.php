@@ -39,7 +39,7 @@
     queue runner process so is also dependent on web site traffic.
 
     The default WP-Cron behavior can be disabled and replaced with a more reliable time-based trigger, such as a server
-    cron event or third-pary cron service, making it more timely and less dependent on web site traffic.
+    cron event or third-party cron service, making it more timely and less dependent on web site traffic.
 
     By default, this plugin...
 
