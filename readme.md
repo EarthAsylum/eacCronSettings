@@ -1,4 +1,4 @@
-## {eac}CronSettings - Site wide settings and actions for WP-Cron / Action Scheduler  
+## {eac}CronSettings & {eac}CronRouting
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
 )
@@ -20,7 +20,8 @@ GitHub URI:             https://github.com/EarthAsylum/eacCronSettings
 </details>
 
 **{eac}CronSettings** - Site wide settings and actions for WP-Cron / Action Scheduler.  
-**{eac}CronRouting** - Reroute WP-Cron events to Action Scheduler or Action Scheduler actions to WP-Cron.
+
+**{eac}CronRouting** - Reroute WP-Cron events to Action Scheduler or Action Scheduler actions to WP-Cron.  
 
 ### Description
 
@@ -51,8 +52,8 @@ cron event or third-party cron service, making it more timely and less dependent
 By default, this plugin...
 
 - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
-- Caches WP-Cron events to a custom table and wp_object_cache, removing the 'cron' option (`WP_CRON_CACHE_EVENTS`).
-- Sets the minimum cron interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
+- Caches WP-Cron events to a custom table and wp_object_cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
+- Sets the minimum cron run interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
 - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
 - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
 - Changes Action Scheduler clean-up retention period from 1 month to 1 week (`AS_CLEANUP_RETENTION_PERIOD`).
@@ -88,15 +89,21 @@ The internal wp-cron process may be disabled when triggered by an external reque
 **WP_CRON_CACHE_EVENTS**
 `true` | `false` | `'revert'` (default: true)
 
-Store WP-Cron events in a custom table rather than 'cron' option. Caches to custom table and wp_object_cache; Removes `cron` from options table and `$alloptions` array; Lessens database reads/writes; All significantly reducing overhead.
-* This will generate *'The cron event list could not be saved'* error that can be ignored.
-* Temporarily set to 'revert' to revert this process and restore 'cron' option from cache.
+Store WP-Cron events in a custom table rather than 'cron' option in the WP options table. 
+* Caches to a custom table and [WP Object Cache](https://developer.wordpress.org/reference/classes/wp_object_cache/).
+* Removes `cron` from the WP options table and `$alloptions` array.
+* Lessens database reads/writes.
+* Significantly reducing overhead.
+
+*This will generate `The cron event list could not be saved` error in `wp-cron.php` when WordPress updates an event. This can be ignored since the event list has been saved to the custom table and cache.*
+
+*Temporarily set this constant to `'revert'` to revert this process and restore the `cron` option from cache.*
 
 **WP_CRON_MINIMUM_INTERVAL** 
 `int (seconds)` (default: 5 minutes)
 
-Set a minimum interval time for all wp-cron jobs.
-Some wp-cron jobs (like Action Scheduler queue runner) may be scheduled every minute or less, this forces a minimum time between executions.
+Set a minimum interval time for all wp-cron events.  
+Some events (like Action Scheduler queue runner) may be scheduled every minute or less, which may be excessive for your environment. This option forces a minimum time between executions for all events.
 
 **WP_CRON_SCHEDULE_INTERVALS**
 `array` (default: monthly)
@@ -132,7 +139,8 @@ Does not disable or change Action Scheduler functions but prevents actions from 
 **AS_RUN_TIME_LIMIT**
 `int (seconds)` (default: 60)
 
-Set Action Scheduler run time limit (normally 30 seconds). Increase this if you have unusually long running actions.
+Set Action Scheduler run time limit (normally 30 seconds).  
+Increase this if you have unusually long running actions.
 
 **AS_CLEANUP_RETENTION_PERIOD**
 `int (seconds)` (default: 1 week)
@@ -188,7 +196,7 @@ Action Scheduler doesn't provide hooks for several rescheduling/unscheduling fun
 
 ### Other Notes
 
-[WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)
+Use the [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
 
 WP Crontrol enables you to take control of the scheduled cron events on your WordPress website or WooCommerce store. From the admin screens you can:
 
