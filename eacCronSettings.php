@@ -48,8 +48,8 @@
     - Sets the minimum cron interval to 5 minutes (WP_CRON_MINIMUM_INTERVAL).
     - Adds a 'Monthly' interval based on the days in the current month (WP_CRON_SCHEDULE_INTERVALS).
     - Increases Action Scheduler run time limit from 30 to 60 seconds (AS_RUN_TIME_LIMIT)
-    - Adds 'failed' actions to Action Scheduler's automatic clean-up.
     - Changes Action Scheduler clean-up retention period from 1 month to 1 week (AS_CLEANUP_RETENTION_PERIOD).
+    - Adds 'failed' actions to Action Scheduler's automatic clean-up.
     - Changes Action Scheduler clean-up batch size from 20 to 100 (AS_CLEANUP_BATCH_SIZE).
 
     Optionally...
@@ -87,11 +87,6 @@ $days_this_month    = (int)wp_date('t');
 define_constants([
     /*
      * Internal wp-cron may be disabled when triggered by external request to /wp-cron.php?doing_wp_cron
-     *      like server-based crontab -> wget -q -O - https://domain.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1
-     *          or EasyCron - https://www.easycron.com
-     *          or UptimeRobot - https://www.uptimerobot.com/
-     *          or AWS EventBridge - https://aws.amazon.com/eventbridge/
-     *          or some other external trigger
      */
 
     'DISABLE_WP_CRON'                   => true,
@@ -303,11 +298,6 @@ if (defined('WP_CRON_REROUTE_EVENTS') && ($schedules = get_option('as_wp_cron_sc
 add_action('action_scheduler_init', function()
 {
     /*
-     * add 'failed' actions to Action Scheduler automatic cleanup
-     */
-    add_filter( 'action_scheduler_default_cleaner_statuses', fn($s) => $s[] = \ActionScheduler_Store::STATUS_FAILED );
-
-    /*
      * disable Action Scheduler queue runner
      */
     if (defined('DISABLE_AS_QUEUE_RUNNER') && DISABLE_AS_QUEUE_RUNNER)
@@ -325,10 +315,12 @@ add_action('action_scheduler_init', function()
 
     /*
      * Set Action Scheduler retention period
+     * Add 'failed' actions to Action Scheduler automatic cleanup
      */
     if (defined('AS_CLEANUP_RETENTION_PERIOD') && is_int(AS_CLEANUP_RETENTION_PERIOD))
     {
         add_filter( 'action_scheduler_retention_period', fn() => AS_CLEANUP_RETENTION_PERIOD );
+	    add_filter( 'action_scheduler_default_cleaner_statuses', fn($s) => $s[] = \ActionScheduler_Store::STATUS_FAILED );
     }
 
     /*
@@ -349,17 +341,17 @@ if (defined('WP_CRON_LOG_ERRORS') && WP_CRON_LOG_ERRORS)
     /*
      * catch & log rescheduling errors
      */
-    add_action( 'cron_reschedule_event_error', function($result, $hook, $v)
+    add_action( 'cron_reschedule_event_error', function($error, $hook, $event)
     {
-        do_action( 'wpcron_log_debug',func_get_args(),current_action() );
+        do_action( 'wpcron_log_debug',get_defined_vars(),current_action() );
     },10,3);
 
     /*
      * catch & log unscheduling errors
      */
-    add_action( 'cron_unschedule_event_error', function($result, $hook, $v)
+    add_action( 'cron_unschedule_event_error', function($error, $hook, $event)
     {
-        do_action( 'wpcron_log_debug',func_get_args(),current_action() );
+        do_action( 'wpcron_log_debug',get_defined_vars(),current_action() );
     },10,3);
 
     /*
