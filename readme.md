@@ -135,7 +135,7 @@ Logs to the {eac}Doojigger debugging log OR the system error log.
 `true` | `false` (default: undefined)
 
 Disable the Action Scheduler queue runner.  
-Does not disable or change Action Scheduler functions but prevents actions from running via the queue runner triggered by WP-Cron. Like WP-Cron, Action Scheduler actions may be triggered by an external process (server cron or third-party cron service) using a [WP-CLI command](https://actionscheduler.org/wp-cli/).
+Does not disable or change Action Scheduler functions but prevents actions from running via the queue runner triggered by WP-Cron. Like WP-Cron, Action Scheduler actions may be triggered by an external process (server cron) using a [WP-CLI command](https://actionscheduler.org/wp-cli/).
 
 **AS_RUN_TIME_LIMIT**
 `int (seconds)` (default: 60)
