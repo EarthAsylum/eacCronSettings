@@ -70,13 +70,13 @@ Alternatively, these constants may be defined in your `wp-config.php` file.
 
 The internal wp-cron process may be disabled when triggered by an external request to `/wp-cron.php?doing_wp_cron` like:
  
-- server-based crontab
+- server-based crontab  
     `wget -q -O - https://domain.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1`
-- (EasyCron)[https://www.easycron.com]
-- (UptimeRobot)[https://www.uptimerobot.com/]
-- (cron-job.org)[https://cron-job.org/]
-- (AWS EventBridge)[https://aws.amazon.com/eventbridge/]
-- (Google Cloud Scheduler)[https://cloud.google.com/scheduler/]
+- [EasyCron](https://www.easycron.com)
+- [UptimeRobot](https://www.uptimerobot.com/)
+- [cron-job.org](https://cron-job.org/)
+- [AWS EventBridge](https://aws.amazon.com/eventbridge/)
+- [Google Cloud Scheduler](https://cloud.google.com/scheduler/)
 - some other external trigger
 
 ##### WP_CRON_CACHE_EVENTS
@@ -162,7 +162,7 @@ Action Scheduler normally purges only 20 records at a time in its clean-up proce
 
 ### Other Notes
 
-(WP Crontrol)[https://wordpress.org/plugins/wp-crontrol/]
+[WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)
 
 WP Crontrol enables you to take control of the scheduled cron events on your WordPress website or WooCommerce store. From the admin screens you can:
 
