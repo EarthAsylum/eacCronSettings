@@ -5,7 +5,7 @@
 
 <details><summary>Document Header</summary>
 
-Plugin URI:             https://github.com/EarthAsylum/eacCronSettings 
+Plugin URI:             https://github.com/EarthAsylum/eacCronSettings  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
 Stable tag:             1.6.0  
 Last Updated:           02-Jun-2025  
