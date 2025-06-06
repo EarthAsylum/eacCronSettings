@@ -10,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name:         {eac}CronRouting
  * Description:         {eac}CronRouting - Reroute WP-Cron events to Action Scheduler or Action Scheduler actions to WP-Cron.
- * Version:             1.7.0
- * Last Updated:        03-Jun-2025
+ * Version:             1.7.1
+ * Last Updated:        05-Jun-2025
  * Requires at least:   5.8
  * Tested up to:        6.8
  * Requires PHP:        7.4

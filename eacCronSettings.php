@@ -10,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name:         {eac}CronSettings
  * Description:         {eac}CronSettings - Site wide settings and actions for WP-Cron / Action Scheduler
- * Version:             1.7.0
- * Last Updated:        03-Jun-2025
+ * Version:             1.7.1
+ * Last Updated:        05-Jun-2025
  * Requires at least:   5.8
  * Tested up to:        6.8
  * Requires PHP:        7.4
@@ -62,8 +62,8 @@
 
 namespace EarthAsylumConsulting\CronSettings;
 
-const VERSION       = '1.7.0';
-const CACHE_ID      = 'eac_cache';
+const VERSION       = '1.7.1';
+const CACHE_ID      = 'eac_key_value';
 $days_this_month    = (int)wp_date('t');
 
 
@@ -401,13 +401,13 @@ function store_wp_to_db()
         update_option(__NAMESPACE__,VERSION,true);
     }
 
-    add_filter( 'pre_update_option_cron',           __NAMESPACE__ .'\\_update_option_cron',         10, 3 );
-    add_filter( 'pre_option_cron',                  __NAMESPACE__ .'\\_get_option_cron',            10, 3 );
+    add_filter( 'pre_update_option_cron',           __NAMESPACE__ .'\\_update_option_cron', 10, 3 );
+    add_filter( 'pre_option_cron',                  __NAMESPACE__ .'\\_get_option_cron',    10, 3 );
 
     // only update cache at end of cron process
     if (defined('DOING_CRON') && DOING_CRON)
     {
-        add_action( "delete_transient_doing_cron",  __NAMESPACE__ .'\\_flush_option_cron',          10, 1 );
+        add_action( "delete_transient_doing_cron",  __NAMESPACE__ .'\\_flush_option_cron',  10, 1 );
     }
 }
 
@@ -478,9 +478,9 @@ function create_cache_table()
         "CREATE TABLE IF NOT EXISTS `{$table}` (
             `id` bigint(10) unsigned NOT NULL AUTO_INCREMENT,
             `key` varchar(255) NOT NULL,
-            `value` longtext,
-            `expires` timestamp,
-            PRIMARY KEY (`id`), UNIQUE `key` (`key`)
+			`value` longtext NOT NULL,
+			`expires` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+            PRIMARY KEY (`id`), UNIQUE `key` (`key`), key `expires` (expires)
         ) ENGINE=InnoDB {$charset_collate};"
     );
     if (!$result) {

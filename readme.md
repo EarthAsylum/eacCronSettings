@@ -7,8 +7,8 @@
 
 Plugin URI:             https://github.com/EarthAsylum/eacCronSettings  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             1.7.0  
-Last Updated:           03-Jun-2025  
+Stable tag:             1.7.1  
+Last Updated:           05-Jun-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires PHP:           8.1  
@@ -207,3 +207,12 @@ WP Crontrol enables you to take control of the scheduled cron events on your Wor
 - Bulk delete cron events.
 - Add and remove custom cron schedules.
 - Export and download cron event lists as a CSV file.
+
+
+### Changelog
+
+#### Version 1.7.1 – June 5, 2025
+
++   Made compatible with forthcoming {eac}KeyValue plugin.
+
+
