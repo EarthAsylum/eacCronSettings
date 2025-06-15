@@ -1,20 +1,20 @@
 ## {eac}CronSettings & {eac}CronRouting
 [![EarthAsylum Consulting](https://img.shields.io/badge/EarthAsylum-Consulting-0?&labelColor=6e9882&color=707070)](https://earthasylum.com/)
 [![WordPress](https://img.shields.io/badge/WordPress-Plugins-grey?logo=wordpress&labelColor=blue)](https://wordpress.org/plugins/search/EarthAsylum/)
-)
+
 
 <details><summary>Document Header</summary>
 
 Plugin URI:             https://github.com/EarthAsylum/eacCronSettings  
 Author:                 [EarthAsylum Consulting](https://www.earthasylum.com)  
-Stable tag:             1.7.1  
-Last Updated:           05-Jun-2025  
+Stable tag:             1.7.2  
+Last Updated:           15-Jun-2025  
 Requires at least:      5.8  
 Tested up to:           6.8  
 Requires PHP:           8.1  
 Contributors:           [earthasylum](https://github.com/earthasylum),[kevinburkholder](https://profiles.wordpress.org/kevinburkholder)  
-License:				GPLv3 or later  
-License URI:			https://www.gnu.org/licenses/gpl.html  
+License:                GPLv3 or later  
+License URI:            https://www.gnu.org/licenses/gpl.html  
 GitHub URI:             https://github.com/EarthAsylum/eacCronSettings  
 
 </details>
@@ -52,7 +52,7 @@ cron event or third-party cron service, making it more timely and less dependent
 By default, this plugin...
 
 - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
-- Caches WP-Cron events to a custom table and WP Object Cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
+- Caches WP-Cron events in memory and to a custom table, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
 - Sets the minimum cron run interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
 - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
 - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
@@ -91,7 +91,7 @@ Does not disable or change WP scheduling functions but disables the default inte
 `true` | `false` | `'revert'` (default: true)
 
 Store WP-Cron events in a custom table rather than 'cron' option in the WP options table. 
-* Caches to a custom table and [WP Object Cache](https://developer.wordpress.org/reference/classes/wp_object_cache/).
+* Caches events in memory and to a custom table (see: [{eac}KeyValue](https://github.com/EarthAsylum/eacKeyValue)).
 * Removes `cron` from the WP options table and `$alloptions` array.
 * Lessens database reads/writes.
 * Significantly reduces overhead.
@@ -197,19 +197,16 @@ Action Scheduler doesn't provide hooks for several rescheduling/unscheduling fun
 
 ### Other Notes
 
-Use the [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
+See: [{eac}KeyValue](https://github.com/EarthAsylum/eacKeyValue), An easy to use, efficient, key-value pair storage mechanism for WordPress that takes advatage of the WP Object Cache.
 
-WP Crontrol enables you to take control of the scheduled cron events on your WordPress website or WooCommerce store. From the admin screens you can:
-
-- View all scheduled cron events along with their arguments, schedule, callback functions, and when they are next due.
-- Edit, delete, pause, resume, and immediately run cron events.
-- Add new cron events.
-- Bulk delete cron events.
-- Add and remove custom cron schedules.
-- Export and download cron event lists as a CSV file.
-
+Recommended: [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/), WP Crontrol enables you to take control of the scheduled cron events on your WordPress website or WooCommerce store. 
 
 ### Changelog
+
+#### Version 1.7.2 – June 15, 2025
+
++   Removed use of WP Object Cache and simply holds event list in memory.
++   Improved error handling.
 
 #### Version 1.7.1 – June 5, 2025
 

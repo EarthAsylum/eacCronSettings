@@ -44,7 +44,7 @@
     By default, this plugin...
 
     - Disables the normal WP-Cron behavior, assuming an external WP-Cron trigger (`DISABLE_WP_CRON`).
-    - Caches WP-Cron events to a custom table and WP Object Cache, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
+    - Caches WP-Cron events in memory and to a custom table, removing the 'cron' option from the WP options table (`WP_CRON_CACHE_EVENTS`).
     - Sets the minimum cron run interval to 5 minutes (`WP_CRON_MINIMUM_INTERVAL`).
     - Adds a 'Monthly' interval based on the days in the current month (`WP_CRON_SCHEDULE_INTERVALS`).
     - Increases Action Scheduler run time limit from 30 to 60 seconds (`AS_RUN_TIME_LIMIT`)
@@ -62,8 +62,9 @@
 
 namespace EarthAsylumConsulting\CronSettings;
 
-const VERSION       = '1.7.1';
+const VERSION       = '1.7.2';
 const CACHE_ID      = 'eac_key_value';
+const CACHE_KEY     = 'wp_cron_events';
 $days_this_month    = (int)wp_date('t');
 
 
@@ -89,7 +90,7 @@ define_constants([
 
     /*
      * Store WP-Cron events in a custom table rather than 'cron' option.
-     * Caches to custom table and wp_cache, removes 'cron' from options table and $alloptions array.
+     * Caches to custom table and cache, removes 'cron' from options table and $alloptions array.
      * This will generate 'The cron event list could not be saved' error that can be ignored.
      * - set to 'revert' to revert this process and restore 'cron' option from cache -
      */
@@ -186,21 +187,23 @@ add_action("wpcron_log_error", function($message,$source)
     if (has_action("eacDoojigger_log_error")) {
         do_action("eacDoojigger_log_error",$message,$source);
     }
-    error_log($source.': '.$message);
+    error_log($source.': '.var_export($message,true));
 },10,2);
 
 /*
  * Debugging - if eacDoojigger is not installed, use error_log
  */
-add_action("wpcron_log_debug", function($data,$source)
+if (defined('WP_CRON_DEBUG') && WP_CRON_DEBUG)
 {
-    if (has_action("eacDoojigger_log_debug")) {
-        do_action("eacDoojigger_log_debug",$data,$source);
-    } else {
-        error_log($source.': '.var_export($data,true));
-    }
-},10,2);
-
+    add_action("wpcron_log_debug", function($data,$source)
+    {
+        if (has_action("eacDoojigger_log_debug")) {
+            do_action("eacDoojigger_log_debug",$data,$source);
+        } else {
+            error_log($source.': '.var_export($data,true));
+        }
+    },10,2);
+}
 
 /*
  * Store WP-Cron events in a custom table rather than 'cron' option.
@@ -295,7 +298,7 @@ if (defined('WP_CRON_LOG_ERRORS') && WP_CRON_LOG_ERRORS)
      */
     add_action( 'cron_reschedule_event_error', function($error, $hook, $event)
     {
-        do_action( 'wpcron_log_debug',get_defined_vars(),current_action() );
+        do_action( 'wpcron_log_error',get_defined_vars(),current_action() );
     },10,3);
 
     /*
@@ -303,7 +306,7 @@ if (defined('WP_CRON_LOG_ERRORS') && WP_CRON_LOG_ERRORS)
      */
     add_action( 'cron_unschedule_event_error', function($error, $hook, $event)
     {
-        do_action( 'wpcron_log_debug',get_defined_vars(),current_action() );
+        do_action( 'wpcron_log_error',get_defined_vars(),current_action() );
     },10,3);
 
     /*
@@ -311,17 +314,17 @@ if (defined('WP_CRON_LOG_ERRORS') && WP_CRON_LOG_ERRORS)
      */
     add_action( 'action_scheduler_failed_to_schedule_next_instance', function($action_id, $e, $action)
     {
-        do_action( 'wpcron_log_debug',[$action->get_hook(),$e->getMessage()],current_action() );
+        do_action( 'wpcron_log_error',[$action->get_hook(),$e->getMessage()],current_action() );
     },10,3);
 
     add_action( 'action_scheduler_failed_execution', function($action_id, $e, $context)
     {
-        do_action( 'wpcron_log_debug',$e->getMessage(),current_action() );
+        do_action( 'wpcron_log_error',$e->getMessage(),current_action() );
     },10,3);
 
     add_action( 'action_scheduler_failed_validation', function($action_id, $e, $context)
     {
-        do_action( 'wpcron_log_debug',$e->getMessage(),current_action() );
+        do_action( 'wpcron_log_error',$e->getMessage(),current_action() );
     },10,3);
 }
 
@@ -395,20 +398,46 @@ if (defined('WP_CRON_DEBUG') && WP_CRON_DEBUG)
  */
 function store_wp_to_db()
 {
-    if (VERSION != get_option(__NAMESPACE__))
+    $version = get_option(__NAMESPACE__);
+    if (VERSION != $version)
     {
-        create_cache_table();
+        create_cache_table($version);
         update_option(__NAMESPACE__,VERSION,true);
     }
 
-    add_filter( 'pre_update_option_cron',           __NAMESPACE__ .'\\_update_option_cron', 10, 3 );
     add_filter( 'pre_option_cron',                  __NAMESPACE__ .'\\_get_option_cron',    10, 3 );
+    add_filter( 'pre_update_option_cron',           __NAMESPACE__ .'\\_update_option_cron', 10, 3 );
 
     // only update cache at end of cron process
     if (defined('DOING_CRON') && DOING_CRON)
     {
         add_action( "delete_transient_doing_cron",  __NAMESPACE__ .'\\_flush_option_cron',  10, 1 );
     }
+}
+
+/**
+ * When getting 'cron' option array
+ */
+function _get_option_cron($return, $option, $default_value)
+{
+    global $wpdb;
+    $table = $wpdb->prefix.CACHE_ID;
+
+    $result = _wp_cron_array();                 //wp_cache_get(CACHE_KEY, CACHE_ID);
+    if (empty($result))
+    {
+        $result = $wpdb->get_var("SELECT `value` FROM `{$table}` WHERE `key` = '".CACHE_KEY."'");
+        if ($result) {
+            $result = unserialize($result);
+            _wp_cron_array($result);            //wp_cache_set(CACHE_KEY,$result,CACHE_ID);
+        }
+    }
+
+    if (!$result) {
+        do_action('wpcron_log_error',[CACHE_KEY.' not found'=>$result],current_action());
+    }
+
+    return (empty($result)) ? $return : $result;
 }
 
 /**
@@ -420,13 +449,16 @@ function _update_option_cron($value, $old_value, $option)
         return $value;
     }
 
-    wp_cache_set('wp_cron_events',$value,CACHE_ID);
+    _wp_cron_array($value);                     //wp_cache_set(CACHE_KEY,$value,CACHE_ID);
 
     if (!defined('DOING_CRON')) {
-        _flush_option_cron(false,$value);
+        if (!has_action("shutdown", __NAMESPACE__ .'\\_flush_option_cron')) {
+            add_action( "shutdown", __NAMESPACE__ .'\\_flush_option_cron' );
+        }
     }
 
     // return $old_value to prevent updating
+    // triggers 'cron_reschedule_event_error' / 'cron_unschedule_event_error'
     return $old_value;
 }
 
@@ -437,37 +469,24 @@ function _flush_option_cron($transient, $cron = false)
 {
     global $wpdb;
     $table = $wpdb->prefix.CACHE_ID;
-    $value = $cron ?: wp_cache_get('wp_cron_events',CACHE_ID);
-    $result = $wpdb->query(
-        $wpdb->prepare(
-                "INSERT INTO `{$table}` (`key`, `value`) VALUES (%s, %s) " .
-                "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);",
-            'wp_cron_events',
-            serialize($value)
-        )
-    );
-    if (!$result) {
-        do_action('wpcron_log_error',$wpdb->last_error,__FUNCTION__);
-    }
-}
 
-/**
- * When getting 'cron' option array
- */
-function _get_option_cron($return, $option, $default_value)
-{
-    global $wpdb;
-    $table = $wpdb->prefix.CACHE_ID;
-    $result = wp_cache_get('wp_cron_events',CACHE_ID) ?:
-              $wpdb->get_var("SELECT `value` FROM `{$table}` WHERE `key` = 'wp_cron_events'",0);
-    if (empty($result)) return $return;
-    return maybe_unserialize($result);
+    $value = $cron ?: _wp_cron_array();         //wp_cache_get(CACHE_KEY,CACHE_ID);
+    $result = $wpdb->query( $wpdb->prepare(
+            "INSERT INTO `{$table}` (`key`, `value`) VALUES (%s, %s) " .
+            "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);",
+        CACHE_KEY,
+        serialize($value)
+    ));
+
+    if (!$result) {
+        do_action('wpcron_log_error',$wpdb->last_error,current_action());
+    }
 }
 
 /**
  * Create cron cache table
  */
-function create_cache_table()
+function create_cache_table($version)
 {
     global $wpdb;
     $table = $wpdb->prefix.CACHE_ID;
@@ -478,8 +497,8 @@ function create_cache_table()
         "CREATE TABLE IF NOT EXISTS `{$table}` (
             `id` bigint(10) unsigned NOT NULL AUTO_INCREMENT,
             `key` varchar(255) NOT NULL,
-			`value` longtext NOT NULL,
-			`expires` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+            `value` longblob NOT NULL,
+            `expires` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (`id`), UNIQUE `key` (`key`), key `expires` (expires)
         ) ENGINE=InnoDB {$charset_collate};"
     );
@@ -490,6 +509,23 @@ function create_cache_table()
         _update_option_cron($cron, false, 'cron');
         delete_option('cron');
     }
+
+    if ($version <= '1.7.1') {
+        $result = $wpdb->query("ALTER TABLE `{$table}` MODIFY COLUMN `value` longblob");
+        if (!$result) {
+            do_action('wpcron_log_error',$wpdb->last_error,__FUNCTION__);
+        }
+    }
+}
+
+/**
+ * Get/set the current cron array
+ */
+function _wp_cron_array($set=null)
+{
+    static $cron = null;
+    if (!empty($set)) $cron = $set;
+    return $cron;
 }
 
 
@@ -510,8 +546,8 @@ function revert_wp_to_db()
 
     if ($value = _get_option_cron(false,'cron',false)) {
         update_option('cron', $value, true);
-        wp_cache_delete('wp_cron_events',CACHE_ID);
-        $wpdb->delete("{$table}",['key'=>'wp_cron_events']);
+        //wp_cache_delete(CACHE_KEY,CACHE_ID);
+        $wpdb->delete("{$table}",['key'=>CACHE_KEY]);
     }
 }
 
