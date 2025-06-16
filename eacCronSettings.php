@@ -495,7 +495,7 @@ function create_cache_table($version)
 
     $result = $wpdb->query(
         "CREATE TABLE IF NOT EXISTS `{$table}` (
-            `id` bigint(10) unsigned NOT NULL AUTO_INCREMENT,
+            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             `key` varchar(255) NOT NULL,
             `value` longblob NOT NULL,
             `expires` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
